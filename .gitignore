@@ -20,6 +20,10 @@
 # vercel
 .vercel
 
+# supabase local runtime
+/supabase/.branches/
+/supabase/.temp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -370,6 +370,7 @@ body { font-family: 'Montserrat', sans-serif; background-color: #0A0A0A; color: 
 .booking-slot.selected span { color: rgba(255, 255, 255, 0.78); }
 .booking-slot.booked,
 .booking-slot.past { cursor: not-allowed; color: #555; }
+.booking-slot.loading { opacity: 0.55; cursor: wait; }
 .booking-slot.booked { background: repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 5px, transparent 5px 10px); }
 .booking-slot.past { opacity: 0.48; }
 .booking-slot.booked strong { text-decoration: line-through; text-decoration-color: rgba(252, 43, 36, 0.55); }
@@ -422,6 +423,8 @@ body { font-family: 'Montserrat', sans-serif; background-color: #0A0A0A; color: 
 .booking-duration-option:disabled { opacity: 0.32; cursor: not-allowed; }
 .booking-form-error { margin-top: 0.9rem; padding: 0.75rem 0.9rem; border: 1px solid rgba(252, 43, 36, 0.25); border-radius: 0.65rem; background: rgba(252, 43, 36, 0.07); color: #ff7b77; font-size: 0.78rem; line-height: 1.5; }
 .booking-submit { width: 100%; min-height: 54px; margin-top: 1.35rem; padding: 0.9rem 1rem; font-size: 0.85rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+.booking-submit:disabled { opacity: 0.58; cursor: wait; }
+.booking-backend-error { margin: 0; }
 
 .booking-price-card { align-self: start; position: sticky; top: 7.5rem; padding: 1.5rem; border: 1px solid rgba(252, 43, 36, 0.22); border-radius: 1.1rem; background: radial-gradient(circle at 100% 0%, rgba(252, 43, 36, 0.12), transparent 48%), #0b0b0b; }
 .booking-price-card h3 { margin: 0.55rem 0 1.4rem; font-family: var(--font-oswald), sans-serif; font-size: clamp(1.55rem, 3vw, 2.2rem); text-transform: uppercase; }
@@ -452,6 +455,7 @@ body { font-family: 'Montserrat', sans-serif; background-color: #0A0A0A; color: 
 .booking-search { margin-top: 1.5rem; }
 .booking-search > div { display: grid; grid-template-columns: 1fr auto; gap: 0.65rem; }
 .booking-search .btn-primary { min-height: 52px; padding: 0 1.2rem; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; }
+.booking-search .booking-load-button { width: 100%; margin-top: 1rem; }
 .booking-demo-phone { min-height: 36px; margin-top: 0.35rem; font-size: 0.68rem; }
 .booking-records { display: grid; gap: 0.7rem; margin-top: 1.25rem; }
 .booking-empty-state { padding: 2.5rem 1rem; border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: 1rem; color: #777; text-align: center; }

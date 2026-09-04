@@ -6,6 +6,7 @@ import {
   cancelBookingInMemory,
   chunkToTime,
   isRangeAvailable,
+  isLockedChunkRangeAvailable,
   isSlotPast,
   isWeekend,
   timeToChunk,
@@ -79,4 +80,16 @@ test("cancels an in-memory confirmed booking and releases its slot", () => {
     true,
   );
   assert.equal(cancelBookingInMemory(result?.bookings ?? [], booking.id), null);
+});
+
+test("validates a range against backend-returned locked chunks", () => {
+  const now = new Date(2026, 8, 4, 8, 0, 0, 0);
+  assert.equal(
+    isLockedChunkRangeAvailable([20, 21], "2026-09-05", 18, 60, now),
+    true,
+  );
+  assert.equal(
+    isLockedChunkRangeAvailable([20, 21], "2026-09-05", 18, 90, now),
+    false,
+  );
 });

@@ -15,9 +15,11 @@ interface BookingConfirmProps {
   selectedDate: string;
   selectedStartChunk: number;
   durationMins: BookingDuration;
+  backendEnabled: boolean;
+  isSubmitting: boolean;
   canUseDuration: (duration: BookingDuration) => boolean;
   onDurationChange: (duration: BookingDuration) => boolean;
-  onConfirm: (customerName: string, phone: string) => BookingResult;
+  onConfirm: (customerName: string, phone: string) => Promise<BookingResult>;
 }
 
 const durationOptions = [
@@ -38,6 +40,8 @@ export function BookingConfirm({
   selectedDate,
   selectedStartChunk,
   durationMins,
+  backendEnabled,
+  isSubmitting,
   canUseDuration,
   onDurationChange,
   onConfirm,
@@ -67,10 +71,10 @@ export function BookingConfirm({
     setFormError("");
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
-    const result = onConfirm(customerName, phone);
+    const result = await onConfirm(customerName, phone);
     if (!result.success) setFormError(result.message);
   }
 
@@ -147,10 +151,18 @@ export function BookingConfirm({
 
           {formError && <p className="booking-form-error" role="alert">{formError}</p>}
 
-          <button className="btn-primary booking-submit" type="submit">
-            Confirm Mock Booking · {formatRupees(siteConfig.pricing.advanceAmount)}
+          <button className="btn-primary booking-submit" type="submit" disabled={isSubmitting}>
+            {isSubmitting
+              ? "Creating booking…"
+              : backendEnabled
+                ? "Create 10-Minute Hold"
+                : `Confirm Mock Booking · ${formatRupees(siteConfig.pricing.advanceAmount)}`}
           </button>
-          <p className="booking-demo-note">Demo only—no card, UPI, or bank payment is collected in Phase 3.</p>
+          <p className="booking-demo-note">
+            {backendEnabled
+              ? "The database will return the authoritative price. Payment remains disabled until Phase 6."
+              : "Demo only—no card, UPI, or bank payment is collected."}
+          </p>
         </form>
 
         <aside className="booking-price-card" aria-label="Booking price summary">
@@ -161,7 +173,7 @@ export function BookingConfirm({
             <div><dt>Rate</dt><dd>{isWeekend(selectedDate) ? "Weekend" : "Weekday"}</dd></div>
             <div><dt>Duration</dt><dd>{durationMins} minutes</dd></div>
             <div className="booking-total-row"><dt>Total</dt><dd>{formatRupees(price.totalPrice)}</dd></div>
-            <div className="booking-advance-row"><dt>Advance now</dt><dd>{formatRupees(price.advancePaid)}</dd></div>
+            <div className="booking-advance-row"><dt>Advance required</dt><dd>{formatRupees(price.advancePaid)}</dd></div>
             <div><dt>Balance at venue</dt><dd>{formatRupees(price.balanceDue)}</dd></div>
           </dl>
           <div className="booking-policy">

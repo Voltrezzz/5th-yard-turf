@@ -12,6 +12,8 @@
     "test": "node --experimental-strip-types --test \"tests/**/*.test.ts\""
   },
   "dependencies": {
+    "@supabase/ssr": "0.12.5",
+    "@supabase/supabase-js": "2.115.0",
     "@tsparticles/react": "4.1.1",
     "@tsparticles/slim": "4.1.1",
     "aos": "2.3.4",

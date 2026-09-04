@@ -10,6 +10,7 @@ import type { BookingSlotState } from "@/types";
 interface TimeSlotGridProps {
   selectedDate: string;
   selectedStartChunk: number | null;
+  isLoading: boolean;
   getSlotState: (startChunk: number) => BookingSlotState;
   onSelect: (startChunk: number) => void;
 }
@@ -17,6 +18,7 @@ interface TimeSlotGridProps {
 export function TimeSlotGrid({
   selectedDate,
   selectedStartChunk,
+  isLoading,
   getSlotState,
   onSelect,
 }: TimeSlotGridProps) {
@@ -27,7 +29,11 @@ export function TimeSlotGrid({
   });
 
   return (
-    <section className="booking-panel booking-reveal" aria-labelledby="booking-time-title">
+    <section
+      className="booking-panel booking-reveal"
+      aria-labelledby="booking-time-title"
+      aria-busy={isLoading}
+    >
       <div className="booking-step-heading booking-step-heading-row">
         <div className="booking-step-title">
           <span className="booking-step-number">02</span>
@@ -41,22 +47,22 @@ export function TimeSlotGrid({
 
       <div className="booking-slot-grid">
         {SLOT_START_CHUNKS.map((startChunk) => {
-          const state = getSlotState(startChunk);
+          const state = isLoading ? "available" : getSlotState(startChunk);
           const selected = selectedStartChunk === startChunk;
-          const unavailable = state !== "available";
+          const unavailable = isLoading || state !== "available";
 
           return (
             <button
               key={startChunk}
               type="button"
-              className={`booking-slot ${state}${selected ? " selected" : ""}`}
+              className={`booking-slot ${state}${isLoading ? " loading" : ""}${selected ? " selected" : ""}`}
               disabled={unavailable}
               aria-pressed={selected}
-              aria-label={`${formatTimeRange(startChunk, startChunk + 2)}, ${state}`}
+              aria-label={`${formatTimeRange(startChunk, startChunk + 2)}, ${isLoading ? "checking availability" : state}`}
               onClick={() => onSelect(startChunk)}
             >
               <strong>{formatTimeRange(startChunk, startChunk + 2)}</strong>
-              <span>{state === "available" ? "Available" : state}</span>
+              <span>{isLoading ? "Checking…" : state === "available" ? "Available" : state}</span>
             </button>
           );
         })}

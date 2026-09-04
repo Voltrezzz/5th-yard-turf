@@ -51,3 +51,19 @@ export interface BookingResult {
   message: string;
   booking?: Booking;
 }
+
+export interface SlotsResponse {
+  date: string;
+  lockedChunks: number[];
+  slots: SlotInfo[];
+}
+
+export interface BookingResponse {
+  booking: Booking;
+  paymentRequired: boolean;
+  message: string;
+}
+
+export interface MyBookingsResponse {
+  bookings: Booking[];
+}

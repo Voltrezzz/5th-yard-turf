@@ -121,6 +121,24 @@ export function isRangeAvailable(
   );
 }
 
+export function isLockedChunkRangeAvailable(
+  lockedChunks: number[],
+  bookingDate: string,
+  startChunk: number,
+  durationMins: BookingDuration,
+  now = new Date(),
+) {
+  const endChunk = startChunk + durationToChunks(durationMins);
+  if (startChunk < OPEN_CHUNK || endChunk > CLOSE_CHUNK) return false;
+  if (isSlotPast(bookingDate, startChunk, now)) return false;
+
+  const locked = new Set(lockedChunks);
+  for (let chunk = startChunk; chunk < endChunk; chunk += 1) {
+    if (locked.has(chunk)) return false;
+  }
+  return true;
+}
+
 export function normalizeIndianPhone(value: string) {
   const digits = value.replace(/\D/g, "");
   if (digits.length === 10) return `+91${digits}`;

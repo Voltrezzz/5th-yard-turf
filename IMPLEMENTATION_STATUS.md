@@ -1,16 +1,17 @@
 # 5TH YARD TURF — Implementation Status
 
 ## Current Phase
-Phase 3 — Booking UI (Mock Data) (complete; awaiting approval for Phase 4)
+Phase 4 — Supabase Backend (code complete; live Supabase verification pending project setup)
 
 ## Completed Phases
 - Phase 1 — Project Scaffold & Design System.
 - Phase 2 — Static Pages (Home + Turf).
 - Phase 3 — Booking UI (Mock Data).
+- Phase 4 — Supabase Backend (repository implementation and local verification complete).
 
 ## Current Architecture
 - Next.js: 15.5.9 App Router with TypeScript, Tailwind CSS 3, and `src/` layout.
-- Supabase: Planned for Phase 4; no client or credentials configured.
+- Supabase: Phase 4 schema, RLS, RPCs, typed clients, and booking APIs are implemented. No project credentials are configured, so the UI safely retains its Phase 3 demo fallback and live database verification remains pending.
 - Razorpay: Planned for Phase 6; test mode first.
 - Auth: Supabase phone OTP planned for Phase 5 using `src/proxy.ts` and `getClaims()`.
 - Deployment: Vercel planned for the final phase; not deployed.
@@ -204,6 +205,21 @@ The objective is:
 - `src/types/index.ts` — booking duration, slot-state, and booking-result types.
 - `IMPLEMENTATION_STATUS.md` — Phase 3 delivery evidence and model handoff.
 
+## Files Created in Phase 4
+- `supabase/config.toml`, `supabase/migrations/001_initial_schema.sql`, `supabase/README.md`
+- `src/lib/supabase/client.ts`, `src/lib/supabase/server.ts`, `src/lib/supabase/auth.ts`, `src/lib/supabase/proxy.ts`
+- `src/lib/booking-data.ts`, `src/types/database.ts`
+- `src/app/api/booking/slots/route.ts`, `create/route.ts`, `cancel/route.ts`, `my-bookings/route.ts`
+- `tests/errors.test.ts`, `tests/phase4-backend-contract.test.ts`
+
+## Files Modified in Phase 4
+- `.env.example` — Supabase public/server variables and a development-only authenticated-user UUID fallback.
+- `.gitignore` — ignores Supabase local runtime state.
+- `package.json`, `package-lock.json` — current Supabase JavaScript and SSR dependencies.
+- `src/hooks/useBooking.ts` and booking components — backend-backed slots, booking creation, cancellation, and authenticated booking retrieval when Supabase is configured; Phase 3 demo behavior remains available otherwise.
+- `src/lib/booking-utils.ts`, `src/lib/errors.ts`, `src/types/index.ts`, `src/app/globals.css` — backend slot validation, stable API errors, response types, and loading/error presentation.
+- Phase 3 tests were preserved and extended with remote-lock behavior.
+
 ## Phase 2 Verification
 - TypeScript: `npm run typecheck` passed.
 - Lint: `npm run lint` passed with zero warnings.
@@ -227,15 +243,29 @@ The objective is:
 - Responsive QA: `/book` was inspected at 375px, 768px, and 1280px. The first screen, 30-day date grid, slot grid, customer form, price card, and mobile navigation remain readable and touch-friendly with no document overflow.
 - Browser console: a fresh production page emitted no errors or warnings.
 
+## Phase 4 Verification
+- TypeScript: `npm run typecheck` passed.
+- Lint: `npm run lint` passed with zero warnings.
+- Tests: `npm test` passed all 17 tests. Phase 4 coverage includes booking creation, duplicate and partial-overlap conflicts, invalid chunks/durations, server-authoritative weekday/weekend pricing, transactional cancellation and lock release, non-refundable confirmed advances, same-slot concurrency with exactly one winner, and successful adjacent concurrent bookings. All Phase 3 tests remain passing.
+- Build: a clean-cache `npm run build` passed on Next.js 15.5.9. All four booking API routes are dynamic server routes and `/`, `/turf`, and `/book` remain successfully generated.
+- Production runtime: `/book` returned HTTP 200; invalid slot dates returned HTTP 400; valid slot and booking requests returned the intentional HTTP 503 configuration error while credentials are absent.
+- Database contract: the migration and transaction model are covered locally by static SQL contract checks plus an executable in-process concurrency model. This verifies repository logic but is not presented as a live PostgreSQL/Supabase integration test.
+- External-service verification: not run. No Supabase URL, anon key, service-role key, linked project, local Supabase CLI, PostgreSQL, or Docker runtime is available in this workspace.
+
 ## Manual Setup Still Required
 - Contact details, turf dimensions, and social links from the owner.
-- Supabase, Razorpay, Vercel, and domain setup in their later phases.
+- Supabase: create a project, enable `pg_cron`, apply `supabase/migrations/001_initial_schema.sql`, and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`. Exact steps and post-setup checks are in `supabase/README.md`.
+- Until Phase 5 implements phone OTP, create a real Supabase auth user and optionally set its UUID as `SUPABASE_DEV_USER_ID` for local Phase 4 exercise. This accommodation is disabled in production.
+- After credentials are added, run live duplicate/overlap concurrency, cancellation transaction, RLS, and cron-expiry checks against the actual Supabase project.
+- Razorpay, Vercel, and domain setup remain for their later phases.
 
 ## Known Issues
 - Build reports that the pinned `caniuse-lite` compatibility dataset is 13 months old. It is intentionally pinned because the current registry mirror advertises newer transitive versions it cannot serve; this does not block compilation or runtime.
 - Hero video uses the approved development stock-media CDN sources with the real local turf image as a poster/fallback; the sources can be swapped for owner-provided footage later.
-- Phase 3 data is intentionally in memory: mock bookings, confirmations, and cancellations reset on page reload. Persistence and concurrency-safe slot locking belong to Phase 4.
-- Authentication and real payment are intentionally absent. The UI labels its demo state and does not collect payment; customer prefill arrives with Phase 5 auth and Razorpay arrives in Phase 6.
+- Without Supabase public environment variables, `/book` intentionally remains in Phase 3 demo mode and resets on reload. With valid variables, Phase 4 uses persistent server APIs and database slot locks.
+- Live Supabase database/RLS/cron behavior is unverified until the required external project is configured; no integration success is claimed.
+- Authentication and real payment remain intentionally absent. Phone OTP arrives in Phase 5 and Razorpay in Phase 6.
+- `npm install` reported four high-severity dependency audit findings. A follow-up registry audit did not complete in this environment; dependency auditing remains an explicit follow-up and is not claimed as passing.
 
 ## Architecture Decisions / Deviations
 - The implementation repository initially contained only `README.md`.
@@ -257,6 +287,14 @@ The objective is:
 - The legacy payment-method dropdown is intentionally omitted because Razorpay will own payment-method selection in Phase 6. Phase 3’s confirmation button creates only a clearly labelled mock booking.
 - Node 24’s built-in TypeScript stripping runs logic tests without introducing a separate test-runner dependency.
 - The `ManageBookingsModal` keeps cancelled records visible for clarity, releases their in-memory slots immediately, and never offers a second cancellation action.
+- Phase 4 preserves demo mode only as a no-credentials fallback; once public Supabase configuration is present, slot availability, booking creation, cancellation, and my-bookings use server APIs backed by PostgreSQL.
+- Server/database prices are authoritative. The create API accepts only date, chunks, and customer details; the database RPC derives duration, weekday/weekend rate, ₹500 advance, and balance without trusting client totals.
+- Duplicate safety is enforced by the `slot_locks` primary key on `(booking_date, chunk_index)`. The create RPC inserts every required chunk inside one transaction, and any duplicate or partial overlap aborts the entire booking.
+- Expired-hold cleanup uses `FOR UPDATE SKIP LOCKED` before releasing chunks. This is a deliberate hardening of the plan's cleanup SQL so cron expiry serializes with payment confirmation instead of releasing a just-confirmed booking's locks.
+- `current_user_is_admin()` is a narrowly granted security-definer helper used by RLS to avoid recursive policy evaluation on `profiles`. API authorization still validates identity and queries the database role server-side.
+- Booking mutation RPC execution is restricted to `service_role`; the key is imported only from server-only modules and is never exposed to browser code.
+- Phase 4 creates an unpaid ten-minute `pending` hold without a Razorpay order. This is the required temporary Phase 4 behavior; order creation and the exceptional captured-after-expiry refund path remain Phase 6 work.
+- The development UUID accommodation accepts only a valid `SUPABASE_DEV_USER_ID`, requires that user to exist in Supabase, and is ignored when `NODE_ENV=production`; no browser-supplied identity header is trusted.
 
 ## Next Phase
-Phase 4 — Supabase Backend, pending explicit user approval and Supabase project setup. Do not begin it automatically.
+Phase 5 — Authentication is awaiting explicit user approval. Do not begin Phase 5 automatically. Live Phase 4 Supabase verification must be completed when project credentials are supplied.

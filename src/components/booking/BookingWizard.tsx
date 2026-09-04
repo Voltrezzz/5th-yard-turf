@@ -17,8 +17,8 @@ export function BookingWizard() {
   const [lastBooking, setLastBooking] = useState<BookingResult["booking"]>();
 
   const handleConfirm = useCallback(
-    (customerName: string, phone: string) => {
-      const result = booking.createBooking(customerName, phone);
+    async (customerName: string, phone: string) => {
+      const result = await booking.createBooking(customerName, phone);
       if (result.success) {
         setLastBooking(result.booking);
         toast({ message: result.message, tone: "success" });
@@ -54,7 +54,9 @@ export function BookingWizard() {
           <div className="booking-intro-actions">
             <div className="booking-demo-badge">
               <span aria-hidden="true" />
-              Demo mode · no payment charged
+              {booking.backendEnabled
+                ? "Supabase backend · payments not active"
+                : "Demo mode · no payment charged"}
             </div>
             <button className="booking-manage-button" type="button" onClick={() => setManageOpen(true)}>
               Manage my bookings
@@ -71,10 +73,17 @@ export function BookingWizard() {
         <div className="booking-flow">
           <DatePicker selectedDate={booking.selectedDate} onSelect={handleDateSelect} />
 
+          {booking.backendError && (
+            <p className="booking-form-error booking-backend-error" role="alert">
+              {booking.backendError}
+            </p>
+          )}
+
           {booking.selectedDate && (
             <TimeSlotGrid
               selectedDate={booking.selectedDate}
               selectedStartChunk={booking.selectedStartChunk}
+              isLoading={booking.isLoadingSlots}
               getSlotState={booking.getSlotState}
               onSelect={handleSlotSelect}
             />
@@ -85,6 +94,8 @@ export function BookingWizard() {
               selectedDate={booking.selectedDate}
               selectedStartChunk={booking.selectedStartChunk}
               durationMins={booking.durationMins}
+              backendEnabled={booking.backendEnabled}
+              isSubmitting={booking.isSubmitting}
               canUseDuration={booking.canUseDuration}
               onDurationChange={booking.selectDuration}
               onConfirm={handleConfirm}
@@ -96,8 +107,12 @@ export function BookingWizard() {
               <span aria-hidden="true">✓</span>
               <div>
                 <p className="booking-kicker">Session locked in</p>
-                <h2>Mock booking confirmed</h2>
-                <p>No payment was charged. Find or cancel it using mobile number {lastBooking.customerPhone}.</p>
+                <h2>{booking.backendEnabled ? "Booking hold created" : "Mock booking confirmed"}</h2>
+                <p>
+                  {booking.backendEnabled
+                    ? `The server returned the authoritative ₹${lastBooking.totalPrice.toLocaleString("en-IN")} price. This unpaid hold expires automatically.`
+                    : `No payment was charged. Find or cancel it using mobile number ${lastBooking.customerPhone}.`}
+                </p>
               </div>
               <button type="button" onClick={() => setManageOpen(true)}>View booking</button>
             </section>
@@ -107,9 +122,10 @@ export function BookingWizard() {
 
       <ManageBookingsModal
         open={manageOpen}
-        bookings={booking.bookings}
+        backendEnabled={booking.backendEnabled}
         onClose={() => setManageOpen(false)}
         onCancel={booking.cancelBooking}
+        onFindBookings={booking.findBookings}
       />
     </div>
   );
