@@ -6,11 +6,11 @@ export const siteConfig = {
   copyrightYear: 2026,
 
   bottomGalleryImages: [
-    { src: "/assets/media_1788502538677.jpg", alt: "5th Yard Turf Night Match" },
-    { src: "/assets/media_1788502538683.jpg", alt: "5th Yard Turf Team Photo" },
-    { src: "/assets/media_1788502538689.jpg", alt: "5th Yard Turf Pets on Field" },
-    { src: "/assets/media_1788502538698.jpg", alt: "5th Yard Turf Trophy Celebration" },
-    { src: "/assets/media_1788502538710.jpg", alt: "5th Yard Turf Night Tournament" },
+    { src: "/assets/media_1788502538677.jpg", alt: "Trophy-winning football team at 5th Yard Turf" },
+    { src: "/assets/media_1788502538683.jpg", alt: "Football team celebrating together under the arena lights" },
+    { src: "/assets/media_1788502538689.jpg", alt: "Two dogs relaxing beside the goal on 5th Yard Turf" },
+    { src: "/assets/media_1788502538698.jpg", alt: "Tournament winners holding their trophy under the floodlights" },
+    { src: "/assets/media_1788502538710.jpg", alt: "Football squad posing with trophies at 5th Yard Turf" },
   ],
 
   contact: {
@@ -43,6 +43,8 @@ export const siteConfig = {
     maxDurationMinutes: 120,
     minDurationMinutes: 60,
     daysInAdvance: 30,
+    cancellationPolicy:
+      "The booking advance is non-refundable when a confirmed booking is cancelled.",
   },
 
   pricing: {
