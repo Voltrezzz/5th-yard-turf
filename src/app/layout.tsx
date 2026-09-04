@@ -57,7 +57,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${montserrat.variable} ${oswald.variable}`}>
+    <html
+      lang="en"
+      className={`${montserrat.variable} ${oswald.variable}`}
+      data-scroll-behavior="smooth"
+    >
       <body className="flex min-h-screen flex-col bg-brand-dark font-sans text-brand-white antialiased">
         <AOSProvider />
         <Navbar />

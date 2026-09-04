@@ -41,3 +41,13 @@ export interface PriceBreakdown {
   advancePaid: number;
   balanceDue: number;
 }
+
+export type BookingDuration = 60 | 90 | 120;
+
+export type BookingSlotState = "available" | "booked" | "past";
+
+export interface BookingResult {
+  success: boolean;
+  message: string;
+  booking?: Booking;
+}

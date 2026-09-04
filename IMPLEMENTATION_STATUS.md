@@ -1,11 +1,12 @@
 # 5TH YARD TURF — Implementation Status
 
 ## Current Phase
-Phase 2 — Static Pages (Home + Turf) (complete; awaiting approval for Phase 3)
+Phase 3 — Booking UI (Mock Data) (complete; awaiting approval for Phase 4)
 
 ## Completed Phases
 - Phase 1 — Project Scaffold & Design System.
 - Phase 2 — Static Pages (Home + Turf).
+- Phase 3 — Booking UI (Mock Data).
 
 ## Current Architecture
 - Next.js: 15.5.9 App Router with TypeScript, Tailwind CSS 3, and `src/` layout.
@@ -171,16 +172,19 @@ The objective is:
 - The ₹500 booking advance is **non-refundable** when a confirmed booking is cancelled.
 - This ordinary-cancellation policy is distinct from the automatic refund safety path for a payment captured after an expired hold.
 
-## Files Created Through Phase 2
+## Files Created Through Phase 3
 - `.env.example`, `.eslintrc.json`, `.eslintignore`, `.gitignore`
 - `package.json`, `package-lock.json`, `next.config.ts`, `postcss.config.mjs`, `tailwind.config.ts`, `tsconfig.json`
 - `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`
 - `src/app/turf/page.tsx`
+- `src/app/book/page.tsx`
 - `src/components/layout/Navbar.tsx`, `NavLinks.tsx`, `Footer.tsx`
 - `src/components/home/HeroSection.tsx`, `AboutSection.tsx`, `FeaturesSection.tsx`, `PricingSection.tsx`, `GalleryMarquee.tsx`, `BottomGalleryMarquee.tsx`
 - `src/components/turf/TurfGallery.tsx`, `TurfSpecs.tsx`
+- `src/components/booking/BookingWizard.tsx`, `DatePicker.tsx`, `TimeSlotGrid.tsx`, `BookingConfirm.tsx`, `ManageBookingsModal.tsx`
 - `src/components/ui/AOSProvider.tsx`, `MouseGlow.tsx`, `Toast.tsx`
-- `src/hooks/useToast.ts`, `src/lib/site-config.ts`, `src/types/index.ts`
+- `src/hooks/useToast.ts`, `src/hooks/useBooking.ts`, `src/lib/site-config.ts`, `src/lib/booking-utils.ts`, `src/lib/validation.ts`, `src/lib/errors.ts`, `src/types/index.ts`
+- `tests/booking-utils.test.ts`, `tests/validation.test.ts`
 - `public/assets/` with four legacy images and all five supplied turf images
 - `public/og.png` branded social-preview artwork
 - `IMPLEMENTATION_STATUS.md`
@@ -192,7 +196,15 @@ The objective is:
 - `src/lib/site-config.ts` — accurate five-image gallery metadata and confirmed cancellation policy.
 - `IMPLEMENTATION_STATUS.md` — Phase 2 requirements, delivery evidence, and model handoff.
 
-## Verification
+## Files Modified in Phase 3
+- `package.json` — Node-native TypeScript test command and ESM package declaration; no new runtime or visual dependency was added.
+- `tsconfig.json` — enables type-only Node test imports with explicit `.ts` extensions.
+- `src/app/globals.css` — responsive booking workflow, slot states, confirmation summary, management modal, reduced-motion behavior, and mobile overflow protection.
+- `src/app/layout.tsx` — declares the existing smooth-scroll behavior for clean Next.js route transitions.
+- `src/types/index.ts` — booking duration, slot-state, and booking-result types.
+- `IMPLEMENTATION_STATUS.md` — Phase 3 delivery evidence and model handoff.
+
+## Phase 2 Verification
 - TypeScript: `npm run typecheck` passed.
 - Lint: `npm run lint` passed with zero warnings.
 - Tests: `npm test` passed; Phase 2 defines no logic-focused automated test files yet (0 tests).
@@ -203,6 +215,18 @@ The objective is:
 - Metadata QA: both routes expose their route-specific title/description and an absolute Open Graph image URL for `public/og.png`.
 - Browser console: no warnings or errors were emitted by either route during QA.
 
+## Phase 3 Verification
+- TypeScript: `npm run typecheck` passed.
+- Lint: `npm run lint` passed with zero warnings.
+- Tests: `npm test` passed all 8 Node tests covering chunk/time conversion, weekday/weekend pricing, past-slot detection, extension collisions, closing-time boundaries, cancellation/slot release, booking validation, phone validation, and OTP validation.
+- Build: a clean-cache `npm run build` passed on Next.js 15.5.9; `/book` is statically generated at 18.8 kB route size and 121 kB first-load JavaScript.
+- Production runtime: `next start` served `/book` with HTTP 200 and the expected booking markup.
+- Browser flow: selected a weekend date, confirmed all 13 one-hour slots, verified an occupied slot, selected a 120-minute session, confirmed the ₹2,600 weekend total / ₹500 advance / ₹2,100 venue balance, created an in-memory booking, and found it by normalized mobile number.
+- Extension validation: the +30 and +60 minute controls visibly disable when the next half-hour chunks overlap the seeded booking; collision and closing-time behavior also pass unit tests.
+- Cancellation: the management UI exposes cancellation only for pending/confirmed records and warns that the ₹500 advance is non-refundable; the pure in-memory transition and slot release pass an automated test.
+- Responsive QA: `/book` was inspected at 375px, 768px, and 1280px. The first screen, 30-day date grid, slot grid, customer form, price card, and mobile navigation remain readable and touch-friendly with no document overflow.
+- Browser console: a fresh production page emitted no errors or warnings.
+
 ## Manual Setup Still Required
 - Contact details, turf dimensions, and social links from the owner.
 - Supabase, Razorpay, Vercel, and domain setup in their later phases.
@@ -210,7 +234,8 @@ The objective is:
 ## Known Issues
 - Build reports that the pinned `caniuse-lite` compatibility dataset is 13 months old. It is intentionally pinned because the current registry mirror advertises newer transitive versions it cannot serve; this does not block compilation or runtime.
 - Hero video uses the approved development stock-media CDN sources with the real local turf image as a poster/fallback; the sources can be swapped for owner-provided footage later.
-- `/book` remains the Phase 3 route. Phase 2 CTAs intentionally point to the planned route without implementing the booking wizard early.
+- Phase 3 data is intentionally in memory: mock bookings, confirmations, and cancellations reset on page reload. Persistence and concurrency-safe slot locking belong to Phase 4.
+- Authentication and real payment are intentionally absent. The UI labels its demo state and does not collect payment; customer prefill arrives with Phase 5 auth and Razorpay arrives in Phase 6.
 
 ## Architecture Decisions / Deviations
 - The implementation repository initially contained only `README.md`.
@@ -226,6 +251,12 @@ The objective is:
 - A branded `public/og.png` social card was integrated into root and route metadata.
 - Root `overflow-x: clip` prevents AOS reveal transforms from creating a transient document scrollbar without disabling the gallery's own reduced-motion horizontal scroller.
 - The confirmed non-refundable advance policy is centralized in `siteConfig.booking.cancellationPolicy` and displayed on both Home and Turf pricing content.
+- The Phase 3 booking route remains public and uses seeded in-memory availability because Supabase and authentication are explicitly deferred to Phases 4 and 5.
+- The booking wizard uses 30-minute integer chunks (open chunk 18 through close boundary 44), renders 13 one-hour starts, and prevents extensions from crossing closing time or any pending/confirmed booking.
+- Weekday/weekend prices are calculated from `siteConfig`; the UI always shows total, ₹500 advance, and balance at venue, while the server remains authoritative once Phase 4 is implemented.
+- The legacy payment-method dropdown is intentionally omitted because Razorpay will own payment-method selection in Phase 6. Phase 3’s confirmation button creates only a clearly labelled mock booking.
+- Node 24’s built-in TypeScript stripping runs logic tests without introducing a separate test-runner dependency.
+- The `ManageBookingsModal` keeps cancelled records visible for clarity, releases their in-memory slots immediately, and never offers a second cancellation action.
 
 ## Next Phase
-Phase 3 — Booking UI (Mock Data), pending explicit user approval. Do not begin it automatically.
+Phase 4 — Supabase Backend, pending explicit user approval and Supabase project setup. Do not begin it automatically.
